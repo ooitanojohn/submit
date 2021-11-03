@@ -61,9 +61,6 @@ if (isset($_POST['search']) || isset($_COOKIE['search'])) {
         }
         // 検索値 cookieに 前の値がある場合削除
         setcookie("search", "", time() - 100);
-        echo '$_COOKIE[search]:';
-        var_dump($_COOKIE['search']);
-        echo '<br>';
         // 検索時のsql文
         $sql = "SELECT * FROM m_book
         WHERE del_date IS NULL AND title LIKE :postTitle
@@ -74,6 +71,7 @@ if (isset($_POST['search']) || isset($_COOKIE['search'])) {
         $data->bindValue(':postTitle', "%{$title}%", PDO::PARAM_STR);
         $sqlExe = true;
         $sqlSearch = true;
+        // cookieに検索値保存
         setcookie("search", $title);
     }
 }
@@ -95,7 +93,7 @@ if ($sqlExe === true) {
     $data->bindValue(':num', $show, PDO::PARAM_INT);
     // クエリ実行
     $data->execute();
-    $nowPageElement = $data->fetchall(PDO::FETCH_NAMED);
+    $nowPageElement = $data->fetchAll(PDO::FETCH_NAMED);
     // *** 現在のページの要素 ***
     foreach ($nowPageElement as $key => $val) {
         unset($nowPageElement[$key]['id']);
