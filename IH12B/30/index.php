@@ -4,18 +4,32 @@
 //********************************************************
 session_start();
 //********************* 設定 **************************
-// *** page内の配列要素数 ***
+// page内の配列要素数
 $show = 5;
 //********************* 初期化 **************************
-// *** pagelink初期化 ***
-$top = '';
-$last = '';
-// table index初期化
+// table tr値
 $tableIndex = [
     'タイトル', '巻数', '値段', '発売日', '購入日'
 ];
-// 検索時の max 初期化
+// 検索値,sql文実行するか,検索値アリか
+$title = '';
+$sqlExe = false;
 $sqlSearch = false;
+// 現在のページ番号
+if (isset($_GET['page'])) {
+    $nowPage = $_GET['page'];
+    $nowPageElement = $nowPage * $show;
+} else {
+    // page 初期化
+    $nowPage = 0;
+    $nowPageElement = 0;
+}
+//********************* topに戻る際 cookie消す **************************
+if (isset($_GET['reset']) && $_GET['reset'] == 'on') {
+    setcookie("search", "", time() - 100);
+    header('Location:index.php?reset=off');
+    exit;
+}
 //********************* sql接続 **************************
 // DB configの階層を指定
 require_once '../../const.php';
@@ -29,29 +43,20 @@ catch (PDOException $err) {
     // エラー内容
     exit('DB接続エラー:' . $err->getMessage());
 }
-//********************* pageaer **************************
-// 現在のページ番号
-if (isset($_GET['page'])) {
-    $nowPage = $_GET['page'];
-    $nowPageElement = $nowPage * $show;
-} else {
-    // page 初期化
-    $nowPage = 0;
-    $nowPageElement = 0;
-}
-//********************* 表示する要素 **************************
-//********************* 検索値あり(sql文準備),なし,初回(sql文準備) **************************
-// 何か受け取った
+
+//********************************************************
+//  検索値あり(sql文準備),なし,初回(sql文準備)
+//********************************************************
 if (isset($_POST['search']) || isset($_COOKIE['search'])) {
-    // 空文字
+    //********************* 検索値無し **************************
     if (isset($_POST['search']) && $_POST['title'] == '') {
+        // 表示内容 , 残った検索値
         $nowPageElement = [
             []
         ];
         setcookie("search", "", time() - 100);
-        $title = '';
-        $sqlExe = false;
-    } // 検索文字アリ
+    }
+    //********************* 検索中 **************************
     else {
         if (isset($_COOKIE['search'])) {
             $title = $_COOKIE['search'];
@@ -59,9 +64,7 @@ if (isset($_POST['search']) || isset($_COOKIE['search'])) {
         if (isset($_POST['title'])) {
             $title = $_POST['title'];
         }
-        // 検索値 cookieに 前の値がある場合削除
-        setcookie("search", "", time() - 100);
-        // 検索時のsql文
+        // 検索値アリのsql文
         $sql = "SELECT * FROM m_book
         WHERE del_date IS NULL AND title LIKE :postTitle
         ORDER BY purchase_date DESC
@@ -69,15 +72,16 @@ if (isset($_POST['search']) || isset($_COOKIE['search'])) {
         // sqlインジェクション
         $data = $link->prepare($sql);
         $data->bindValue(':postTitle', "%{$title}%", PDO::PARAM_STR);
+        // cookieに検索値保存 前の値がある場合削除
+        setcookie("search", "", time() - 100);
+        setcookie("search", $title);
+        // 実行状況値
         $sqlExe = true;
         $sqlSearch = true;
-        // cookieに検索値保存
-        setcookie("search", $title);
     }
 }
-// 初回
+//********************* ページ初見時 全件検索,ページリンクレコードMAX**************************
 else {
-    $title = '';
     $sql = "SELECT * FROM m_book
     WHERE del_date IS NULL
     ORDER BY purchase_date DESC
@@ -113,8 +117,10 @@ if ($sqlExe === true) {
     $userList = $max->fetch(PDO::FETCH_ASSOC);
     $userList = intval($userList['count(*)']);
 }
-
 //********************* リンク表示 on off **************************
+// *** pageLink初期化 ***
+$top = '';
+$last = '';
 // a 検索値なし&&検索結果なし || b 検索値アリ,初回
 // a リンクを非表示
 if ($sqlExe === false || empty($nowPageElement[0])) {

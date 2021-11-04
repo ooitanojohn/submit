@@ -7,27 +7,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
+        /* 初期化*/
+        li {
+            list-style: none;
+        }
+
+        /* レイアウト*/
+        body {
+            text-align: center;
+            height: fit-content;
+        }
+
+        table {
+            margin: 0 auto;
+        }
+
         a {
-            padding-right: 5px;
+            margin-right: 5px;
         }
 
-        a.none {
-            display: none;
+        form,
+        summary,
+        table {
+            margin-bottom: 10px;
         }
 
-        tr.none {
+        /* ページング用*/
+        .none {
             display: none;
         }
     </style>
 </head>
 
 <body>
+    <h1>課題 no.1 ページャ</h1>
     <form method='post'>
         <input type="text" name="title">
         <button type="submit" name="search">検索</button>
     </form>
     <table border=1>
-        <summary><a href="index.php">漫画DB TOPへ</a></summary>
+        <summary><a href="index.php?reset=on">漫画DB TOPへ</a></summary>
         <tr>
             <?php foreach ($tableIndex as $val) { ?>
                 <td><?php echo $val ?></td>
@@ -41,11 +60,13 @@
             </tr>
         <?php endforeach; ?>
     </table>
-    <a href=" index.php?<?php echo 'page=' . $nowPage - 1 ?>" class="<?php echo $top ?>">前へ</a>
-    <?php foreach ($pageLinkNum as $key => $val) : ?>
-        <a href="index.php?<?php echo 'page=' . $key ?>" class="<?php echo $val ?>"><?php echo $key ?></a>
-    <?php endforeach; ?>
-    <a href="index.php?<?php echo 'page=' . $nowPage + 1 ?>" class="<?php echo $last ?>">次へ</a>
+    <li>
+        <a href=" index.php?<?php echo 'page=' . $nowPage - 1 ?>" class="<?php echo $top ?>">前へ</a>
+        <?php foreach ($pageLinkNum as $key => $val) { ?>
+            <a href="index.php?<?php echo 'page=' . $key ?>" class="<?php echo $val ?>"><?php echo $key ?></a>
+        <?php } ?>
+        <a href="index.php?<?php echo 'page=' . $nowPage + 1 ?>" class="<?php echo $last ?>">次へ</a>
+    </li>
 </body>
 
 </html>
