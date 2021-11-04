@@ -12,8 +12,6 @@ $tableIndex = [
     'タイトル', '巻数', '値段', '発売日', '購入日'
 ];
 // 検索値,sql文実行するか,検索値アリか
-$title = '';
-$sqlExe = false;
 $sqlSearch = false;
 // 現在のページ番号
 if (isset($_GET['page'])) {
@@ -55,6 +53,8 @@ if (isset($_POST['search']) || isset($_COOKIE['search'])) {
             []
         ];
         setcookie("search", "", time() - 100);
+        $title = '';
+        $sqlExe = false;
     }
     //********************* 検索中 **************************
     else {
@@ -82,6 +82,7 @@ if (isset($_POST['search']) || isset($_COOKIE['search'])) {
 }
 //********************* ページ初見時 全件検索,ページリンクレコードMAX**************************
 else {
+    $title = '';
     $sql = "SELECT * FROM m_book
     WHERE del_date IS NULL
     ORDER BY purchase_date DESC
